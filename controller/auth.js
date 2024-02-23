@@ -51,7 +51,7 @@ const loginUser = async (req, res) => {
   if (!isPasswordCorrect) {
     return res.status(401).json({ message: 'Invalid credentials' });
   }
-  const token = jwt.sign({ userId: user._id },JWT_SECRET,  {
+  const token =   jwt.sign({ userId: user._id },JWT_SECRET,  {
     expiresIn: '1h',
   });
     console.log(process.env.JWT_SECRET);
@@ -60,7 +60,40 @@ const loginUser = async (req, res) => {
     .json({ message: 'Login successful!', token, userId: user._id });
 };
 
+const forgetPassword = async () => {
+  const token =  jwt.sign({ userId: user._id }, JWT_SECRET, {
+    expiresIn: '5m',
+  })
+   const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.PASSWORD,
+
+      }
+   });
+  try {
+    const mailOptions = {
+      from: process.env.EMAIL,
+      to: user.email,
+      subject: 'Password Reset',
+      html: `
+        <p>Hello,</p>
+        <p>You requested a password reset. Click <a href="http://example.com/reset-password?token=${token}">here</a> to reset your password.</p>
+        <p>If you didn't request this, you can safely ignore this email.</p>
+      `,
+    };
+    // Send the email
+    await transporter.sendMail(mailOptions);
+
+    console.log('Password reset email sent successfully');
+  }
+  catch (error) {
+    console.error(error);
+  }
+};
 module.exports = {
   registerUser,
   loginUser,
+  forgetPassword,
 };
