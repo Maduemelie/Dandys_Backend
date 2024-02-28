@@ -70,9 +70,10 @@ const forgetPassword = async (req, res) => {
   if (!user) {
     return res.status(404).json({ message: 'User not found' });
   }
- const expiresInMinutes = 5; // Set the expiration time in minutes
- const expirationTime = Date.now() + expiresInMinutes * 60 * 1000; // Calculate the expiration time in milliseconds
- const token = jwt.sign({ userId: user._id, exp: expirationTime }, JWT_SECRET);
+
+  const expiresInMinutes = 5; // Set the expiration time in minutes
+  const expirationTime = Date.now() + expiresInMinutes * 60 * 1000; // Calculate the expiration time in milliseconds
+  const token = jwt.sign({ userId: user._id, exp: expirationTime }, JWT_SECRET);
 
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -81,7 +82,7 @@ const forgetPassword = async (req, res) => {
       pass: process.env.PASSWORD,
     },
   });
-  
+
   try {
     const mailOptions = {
       from: process.env.EMAIL,
@@ -96,11 +97,15 @@ const forgetPassword = async (req, res) => {
     // Send the email
     await transporter.sendMail(mailOptions);
 
-    res.status(200).json('Password reset email sent successfully');
+    // Respond with a success message
+    res.status(200).json({ message: 'Password reset email sent successfully' });
   } catch (error) {
     console.error(error);
+    // Respond with an error message
+    res.status(500).json({ message: 'Failed to send password reset email' });
   }
 };
+
 
 const resetPassword = async (req, res) => {
   const { password, confirmPassword } = req.body;
