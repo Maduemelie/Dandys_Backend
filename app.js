@@ -26,4 +26,8 @@ app.options('*', (req, res) => {
 });
 app.use('/auth', authRouter);
 
+app.get('/', (req, res) => {
+  res.send('Dandy Backend');
+});
+
 module.exports = app;
